@@ -114,14 +114,14 @@ Open **http://127.0.0.1:8000** in your browser 🎉
 
 ## 📸 Screenshots
 
-### 🏠 Home Page
-![Home](screenshots/home.png)
+### 🏠 Profile Page
+![Profile](screenshots/profile.png)
 
 ### 🔐 Login Page
 ![Login](screenshots/login.png)
 
-### 👤 Profile Page
-![Profile](screenshots/profile.png)
+### 👤 signup Page
+![signup](screenshots/signup.png)
 
 ## 🔑 Environment Variables
 
