@@ -11,7 +11,8 @@
 
 ## 🌐 Live Demo
 
-🔗 **[pixgram.onrender.com](https://pixgram.onrender.com)**
+🔗 **[pixgram.onrender.com](https://pixgram-9wb9.onrender.com)**
+
 
 ---
 
@@ -171,7 +172,7 @@ DirectMessage    — sender + receiver + message
 
 **Amit Gupta**
 
-Full-Stack Developer | Python & Django Enthusiast
+Full-Stack Developer
 
 [![GitHub](https://img.shields.io/badge/GitHub-amitsgupta11-black?style=flat-square&logo=github)](https://github.com/amitsgupta11)
 
