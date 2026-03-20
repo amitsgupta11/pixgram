@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}@{{ profile_user.username }} – PixGram{% endblock %}
+{% block extra_css %}
+<style>
+.profile-wrapper{max-width:900px;margin:2.5rem auto;padding:0 1rem;}
+.profile-header{display:flex;align-items:center;gap:3rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid #dbdbdb;}
+@media(max-width:576px){
+  .profile-header{flex-direction:column;gap:1rem;text-align:center;}
+  .profile-stats{justify-content:center;}
+  .profile-avatar{width:90px;height:90px;}
+  .posts-grid{grid-template-columns:repeat(3,1fr);gap:2px;}
+}
+.profile-avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid transparent;background:linear-gradient(white,white) padding-box,linear-gradient(45deg,#f09433,#bc1888) border-box;}
+.profile-info h2{font-size:1.6rem;font-weight:300;color:#262626;margin-bottom:.8rem;}
+.profile-stats{display:flex;gap:2rem;margin-bottom:1rem;}
+.stat{text-align:center;cursor:pointer;}
+.stat-num{font-size:1.1rem;font-weight:700;color:#262626;display:block;}
+.stat-label{font-size:.85rem;color:#262626;}
+.stat a{text-decoration:none;color:inherit;}
+.stat a:hover .stat-num{text-decoration:underline;}
+.profile-bio{font-size:.92rem;color:#262626;line-height:1.6;max-width:380px;}
+.btn-edit-profile{border:1px solid #dbdbdb;background:#fff;color:#262626;border-radius:8px;padding:.4rem 1.2rem;font-weight:600;font-size:.88rem;text-decoration:none;display:inline-block;transition:background .15s;}
+.btn-edit-profile:hover{background:#f5f5f5;color:#262626;}
+.btn-follow{background:#0095f6;border:none;color:#fff;border-radius:8px;padding:.4rem 1.4rem;font-weight:700;font-size:.88rem;text-decoration:none;display:inline-block;transition:background .15s;cursor:pointer;}
+.btn-follow:hover{background:#1aa3ff;color:#fff;}
+.btn-unfollow{background:#fff;border:1px solid #dbdbdb;color:#262626;border-radius:8px;padding:.4rem 1.4rem;font-weight:700;font-size:.88rem;text-decoration:none;display:inline-block;transition:background .15s;}
+.btn-unfollow:hover{background:#f5f5f5;color:#262626;}
+.posts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;}
+@media(max-width:500px){.posts-grid{grid-template-columns:repeat(2,1fr);}}
+.grid-post{position:relative;aspect-ratio:1;overflow:hidden;cursor:pointer;background:#efefef;}
+.grid-post img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s;}
+.grid-post:hover img{filter:brightness(.75);}
+.grid-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:1.5rem;opacity:0;transition:opacity .2s;color:#fff;font-weight:700;font-size:.95rem;}
+.grid-post:hover .grid-overlay{opacity:1;}
+.grid-post-text{aspect-ratio:1;background:linear-gradient(135deg,#f5f5f5,#e8e8e8);display:flex;align-items:center;justify-content:center;padding:1rem;text-align:center;cursor:pointer;text-decoration:none;}
+.grid-post-text p{font-size:.8rem;color:#555;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;margin:0;}
+
+@media(max-width:576px){
+  .profile-wrapper{padding:0 .8rem;}
+  .profile-header{flex-direction:column;gap:1rem;text-align:center;padding-bottom:1.2rem;}
+  .profile-avatar{width:90px;height:90px;}
+  .profile-stats{justify-content:center;gap:1.5rem;}
+  .posts-grid{grid-template-columns:repeat(3,1fr);gap:2px;}
+}
+.empty-profile{grid-column:1/-1;text-align:center;padding:4rem 2rem;color:#8e8e8e;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <img src="{{ profile_user.profile.avatar_url }}" class="profile-avatar" alt="{{ profile_user.username }}"/>
+
+    <div class="profile-info">
+      <!-- Username + buttons -->
+      <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+        <h2 style="margin:0;">{{ profile_user.username }}</h2>
+
+        {% if profile_user == user %}
+          <!-- Apna profile -->
+          <a href="{% url 'edit_profile' %}" class="btn-edit-profile">Edit profile</a>
+
+        {% else %}
+          <!-- Doosre ka profile -->
+          <form method="post" action="{% url 'toggle_follow' profile_user.username %}" style="display:inline;">
+            {% csrf_token %}
+            {% if is_following %}
+              <button type="submit" class="btn-unfollow">Following</button>
+            {% else %}
+              <button type="submit" class="btn-follow">Follow</button>
+            {% endif %}
+          </form>
+        {% endif %}
+      </div>
+
+      <!-- Stats: posts, followers, following -->
+      <div class="profile-stats">
+        <div class="stat">
+          <span class="stat-num">{{ post_count }}</span>
+          <span class="stat-label">post{{ post_count|pluralize }}</span>
+        </div>
+
+        <div class="stat">
+          <a href="{% url 'followers' profile_user.username %}">
+            <span class="stat-num">{{ profile_user.profile.follower_count }}</span>
+            <span class="stat-label">followers</span>
+          </a>
+        </div>
+
+        <div class="stat">
+          <a href="{% url 'following' profile_user.username %}">
+            <span class="stat-num">{{ profile_user.profile.following_count }}</span>
+            <span class="stat-label">following</span>
+          </a>
+        </div>
+      </div>
+
+      {% if profile_user.get_full_name %}
+        <strong style="font-size:.92rem;display:block;margin-bottom:.3rem;">{{ profile_user.get_full_name }}</strong>
+      {% endif %}
+
+      {% if profile_user.profile.bio %}
+        <p class="profile-bio">{{ profile_user.profile.bio }}</p>
+      {% else %}
+        <p class="profile-bio" style="color:#8e8e8e;font-style:italic;">No bio yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Posts Grid -->
+  <div class="posts-grid">
+    {% for post in posts %}
+      {% if post.image %}
+        <div class="grid-post">
+          <a href="{% url 'post_detail' post.pk %}">
+            <img src="{{ post.image.url }}" alt="Post"/>
+            <div class="grid-overlay">
+              <span><i class="bi bi-heart-fill"></i> {{ post.like_count }}</span>
+              <span><i class="bi bi-chat-fill"></i> {{ post.comment_count }}</span>
+            </div>
+          </a>
+        </div>
+      {% else %}
+        <a href="{% url 'post_detail' post.pk %}" class="grid-post-text">
+          <p>{{ post.caption }}</p>
+        </a>
+      {% endif %}
+    {% empty %}
+      <div class="empty-profile">
+        <i class="bi bi-camera" style="font-size:3rem;color:#dbdbdb;display:block;margin-bottom:1rem;"></i>
+        <p style="font-weight:700;font-size:1.1rem;color:#262626;">No posts yet</p>
+        {% if profile_user == user %}
+          <a href="{% url 'create_post' %}" class="btn btn-primary mt-2 px-4">Share your first photo</a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

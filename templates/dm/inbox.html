@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Messages – PixGram{% endblock %}
+{% block extra_css %}
+<style>
+.dm-wrap{max-width:600px;margin:2rem auto;padding:0 1rem;}
+.dm-card{background:#fff;border:1px solid #dbdbdb;border-radius:12px;overflow:hidden;}
+.dm-top{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid #efefef;}
+.dm-top h5{margin:0;font-weight:700;font-size:.95rem;}
+.btn-new-dm{background:#0095f6;color:#fff;border:none;border-radius:8px;padding:.32rem .9rem;font-size:.82rem;font-weight:600;text-decoration:none;}
+.btn-new-dm:hover{background:#1aa3ff;color:#fff;}
+.convo-row{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.2rem;border-bottom:1px solid #efefef;text-decoration:none;color:inherit;transition:background .15s;}
+.convo-row:last-child{border-bottom:none;}
+.convo-row:hover{background:#fafafa;}
+.convo-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.convo-name{font-weight:700;font-size:.9rem;color:#262626;display:block;}
+.convo-preview{font-size:.82rem;color:#8e8e8e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;}
+.convo-time{font-size:.72rem;color:#8e8e8e;white-space:nowrap;}
+.unread-dot{width:9px;height:9px;border-radius:50%;background:#0095f6;flex-shrink:0;}
+.convo-name.bold{font-weight:800;}
+.empty-dm{text-align:center;padding:3.5rem 2rem;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dm-wrap">
+  <div class="dm-card">
+    <div class="dm-top">
+      <h5><i class="bi bi-send me-2"></i>Messages</h5>
+      <a href="{% url 'dm_new' %}" class="btn-new-dm">
+        <i class="bi bi-pencil-square me-1"></i>New
+      </a>
+    </div>
+
+    {% for convo in conversations %}
+    <a href="{% url 'dm_conversation' convo.user.username %}" class="convo-row">
+      <img src="{{ convo.user.profile.avatar_url }}" class="convo-avatar" alt="{{ convo.user.username }}"/>
+      <div style="flex:1;min-width:0;">
+        <span class="convo-name {% if convo.unread > 0 %}bold{% endif %}">
+          {{ convo.user.username }}
+        </span>
+        <div class="convo-preview">
+          {% if convo.last_msg %}
+            {% if convo.last_msg.sender == request.user %}You: {% endif %}
+            {{ convo.last_msg.message }}
+          {% endif %}
+        </div>
+      </div>
+      <div class="d-flex flex-column align-items-end gap-1">
+        {% if convo.last_msg %}
+        <span class="convo-time">{{ convo.last_msg.created_at|timesince }}</span>
+        {% endif %}
+        {% if convo.unread > 0 %}
+        <span class="unread-dot"></span>
+        {% endif %}
+      </div>
+    </a>
+    {% empty %}
+    <div class="empty-dm">
+      <i class="bi bi-chat-dots" style="font-size:3rem;color:#dbdbdb;display:block;margin-bottom:1rem;"></i>
+      <p style="font-weight:700;color:#262626;">No messages yet</p>
+      <p style="color:#8e8e8e;font-size:.88rem;">Kisi ko message bhejo!</p>
+      <a href="{% url 'dm_new' %}" class="btn btn-primary mt-2 px-4">Send a message</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

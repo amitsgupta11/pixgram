@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up – PixGram{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  padding: 1rem;
+}
+.auth-card {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 16px;
+  padding: 1.8rem 1.2rem;
+  width: 100%;
+  max-width: 400px;
+}
+.auth-logo {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  letter-spacing: -1px;
+}
+.auth-subtitle {
+  text-align: center;
+  color: #8e8e8e;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1.8rem;
+  line-height: 1.5;
+}
+.form-floating label { font-size: 0.88rem; color: #8e8e8e; }
+.btn-signup {
+  width: 100%;
+  background: linear-gradient(90deg, #833ab4, #fd1d1d, #fcb045);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.7rem;
+  transition: opacity 0.2s;
+}
+.btn-signup:hover { opacity: 0.9; color: #fff; }
+.divider {
+  display: flex; align-items: center; gap: 1rem;
+  color: #8e8e8e; font-size: 0.8rem; font-weight: 600;
+  margin: 1.2rem 0;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: #dbdbdb;
+}
+.auth-switch {
+  border: 1px solid #dbdbdb; border-radius: 12px;
+  padding: 1rem; text-align: center;
+  font-size: 0.9rem; margin-top: 1rem; color: #262626;
+}
+.auth-switch a { color: #0095f6; font-weight: 700; text-decoration: none; }
+@media(max-width:480px){
+  .auth-card{padding:2rem 1.2rem;border-radius:12px;}
+  .auth-logo{font-size:2rem;}
+}
+.field-error { font-size: 0.78rem; color: #ed4956; margin-top: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div>
+    <div class="auth-card">
+      <div class="auth-logo">PixGram</div>
+      <p class="auth-subtitle">Sign up to see photos and posts<br>from your friends.</p>
+
+      <!-- Messages -->
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} py-2 mb-3" style="font-size:0.88rem;border-radius:10px;">
+            {{ msg }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="mb-3">
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="field-error">{{ form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="field-error">{{ form.email.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          {{ form.password1 }}
+          {% if form.password1.errors %}
+            <div class="field-error">{{ form.password1.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-3">
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <div class="field-error">{{ form.password2.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <p style="font-size:0.75rem;color:#8e8e8e;text-align:center;margin-bottom:1rem;">
+          By signing up, you agree to our <a href="#" style="color:#262626;">Terms</a> and
+          <a href="#" style="color:#262626;">Privacy Policy</a>.
+        </p>
+
+        <button type="submit" class="btn btn-signup">Sign up</button>
+      </form>
+
+      <div class="divider">OR</div>
+
+    </div>
+
+    <div class="auth-switch">
+      Have an account? <a href="{% url 'login' %}">Log in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

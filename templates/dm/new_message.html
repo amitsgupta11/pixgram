@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}New Message – PixGram{% endblock %}
+{% block extra_css %}
+<style>
+.nm-wrap{max-width:500px;margin:2rem auto;padding:0 1rem;}
+.nm-card{background:#fff;border:1px solid #dbdbdb;border-radius:12px;overflow:hidden;}
+.nm-header{padding:1rem 1.2rem;border-bottom:1px solid #efefef;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.8rem;}
+.nm-body{padding:1rem 1.2rem;}
+.nm-user-row{display:flex;align-items:center;gap:.9rem;padding:.8rem 0;border-bottom:1px solid #efefef;text-decoration:none;color:inherit;transition:background .1s;}
+.nm-user-row:last-child{border-bottom:none;}
+.nm-user-row:hover{background:#fafafa;}
+.nm-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;}
+.nm-name{font-weight:700;font-size:.9rem;color:#262626;display:block;}
+.nm-bio{font-size:.8rem;color:#8e8e8e;}
+.empty-follow{text-align:center;padding:2.5rem 1rem;color:#8e8e8e;font-size:.88rem;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nm-wrap">
+  <div class="nm-card">
+    <div class="nm-header">
+      <a href="{% url 'dm_inbox' %}" style="color:#262626;text-decoration:none;font-size:1.1rem;">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      New Message
+    </div>
+    <div class="nm-body">
+      <p style="font-size:.82rem;color:#8e8e8e;margin-bottom:.8rem;">
+        People you follow
+      </p>
+      {% for u in following %}
+      <a href="{% url 'dm_conversation' u.username %}" class="nm-user-row d-flex">
+        <img src="{{ u.profile.avatar_url }}" class="nm-avatar" alt="{{ u.username }}"/>
+        <div>
+          <span class="nm-name">{{ u.username }}</span>
+          <span class="nm-bio">{{ u.get_full_name|default:u.profile.bio|truncatechars:40 }}</span>
+        </div>
+      </a>
+      {% empty %}
+      <div class="empty-follow">
+        <i class="bi bi-people" style="font-size:2.5rem;display:block;margin-bottom:.5rem;color:#dbdbdb;"></i>
+        Kisi ko follow karo pehle — phir message bhejo!
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

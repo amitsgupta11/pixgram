@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block title %}Feed – PixGram{% endblock %}
+{% block extra_css %}
+<style>
+/* ── Mobile Feed ── */
+@media(max-width:768px){
+  .feed-layout{grid-template-columns:1fr!important;gap:0;margin:.5rem auto;}
+  .feed-sidebar{display:none!important;}
+  .post-card{border-radius:0;border-left:none;border-right:none;margin-bottom:.5rem;}
+  .story-bar{border-radius:0;border-left:none;border-right:none;padding:.7rem .8rem;}
+  .post-image{max-height:400px;}
+  .feed-layout main{padding:0;}
+}
+@media(max-width:576px){
+  .post-header{padding:.6rem .8rem;}
+  .post-actions{padding:.4rem .8rem .2rem;}
+  .post-likes{padding:0 .8rem .2rem;}
+  .post-caption{padding:0 .8rem .4rem;}
+  .post-comment-preview{padding:0 .8rem .3rem;}
+  .post-comment-form{padding:.5rem .8rem;}
+  .story-ring,.story-add-ring{width:54px;height:54px;}
+  .story-name{font-size:.62rem;max-width:56px;}
+}
+
+.story-bar{display:flex;gap:.9rem;overflow-x:auto;padding:.9rem 1rem;background:#fff;border:1px solid #dbdbdb;border-radius:12px;margin-bottom:1.2rem;scrollbar-width:none;}
+.story-bar::-webkit-scrollbar{display:none;}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:.35rem;cursor:pointer;flex-shrink:0;}
+.story-ring{width:62px;height:62px;border-radius:50%;padding:2.5px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#bc1888);}
+.story-add-ring{position:relative;width:62px;height:62px;border-radius:50%;border:2px dashed #dbdbdb;overflow:visible;}
+.story-add-ring .story-img{border:2px solid #fff;}
+.story-img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2.5px solid #fff;display:block;}
+.story-plus{position:absolute;bottom:-2px;right:-2px;background:#0095f6;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.75rem;border:2px solid #fff;}
+.story-name{font-size:.68rem;color:#262626;font-weight:500;text-align:center;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Share modal */
+.share-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;}
+.share-modal-bg.active{display:flex;}
+.share-modal{background:#fff;border-radius:16px;padding:1.5rem;width:320px;max-width:90vw;}
+.share-modal h6{font-weight:700;margin-bottom:1rem;text-align:center;}
+.share-link-box{display:flex;gap:.5rem;margin-bottom:1rem;}
+.share-link-input{flex:1;border:1px solid #dbdbdb;border-radius:8px;padding:.4rem .8rem;font-size:.82rem;color:#262626;background:#fafafa;}
+.btn-copy{background:#0095f6;border:none;color:#fff;border-radius:8px;padding:.4rem .8rem;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-copy:hover{background:#1aa3ff;}
+.share-options{display:flex;gap:.6rem;justify-content:center;}
+.share-opt{display:flex;flex-direction:column;align-items:center;gap:.3rem;text-decoration:none;color:#262626;font-size:.72rem;font-weight:500;cursor:pointer;border:none;background:none;}
+.share-opt-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.opt-wa{background:#dcf8c6;color:#25d366;}
+.opt-copy{background:#f0f0f0;color:#262626;}
+.opt-dm{background:#e8f4ff;color:#0095f6;}
+
+.feed-layout{display:grid;grid-template-columns:1fr 300px;gap:2rem;max-width:960px;margin:1.5rem auto;padding:0 1rem;}
+@media(max-width:900px){.feed-layout{grid-template-columns:1fr;}.feed-sidebar{display:none;}}
+@media(max-width:576px){.feed-layout{padding:0;margin:.5rem auto;}.post-card{border-radius:0;border-left:none;border-right:none;margin-bottom:4px;}}
+.post-card{background:#fff;border:1px solid #dbdbdb;border-radius:12px;margin-bottom:1.5rem;overflow:hidden;}
+.post-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;}
+.post-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid transparent;background:linear-gradient(white,white) padding-box,linear-gradient(45deg,#f09433,#bc1888) border-box;}
+.post-username{font-weight:700;font-size:.92rem;color:#262626;text-decoration:none;}
+.post-username:hover{text-decoration:underline;color:#262626;}
+.post-time{font-size:.75rem;color:#8e8e8e;}
+.post-image{width:100%;max-height:600px;object-fit:cover;display:block;}
+@media(max-width:576px){.post-image{max-height:400px;}}
+.post-actions{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem .3rem;}
+.action-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px 6px;border-radius:6px;line-height:1;transition:transform .15s;color:#262626;text-decoration:none;display:inline-flex;align-items:center;}
+.action-btn:hover{transform:scale(1.1);}
+.action-btn.liked .bi-heart-fill{color:#ed4956;}
+.post-likes{padding:0 1rem .3rem;font-size:.88rem;font-weight:700;color:#262626;}
+.post-caption{padding:0 1rem .5rem;font-size:.9rem;line-height:1.5;color:#262626;}
+.caption-author{font-weight:700;margin-right:.3rem;text-decoration:none;color:#262626;}
+.caption-author:hover{text-decoration:underline;}
+.post-comment-preview{padding:0 1rem .4rem;font-size:.86rem;color:#262626;}
+.comment-author{font-weight:700;margin-right:.3rem;}
+.view-comments-link{padding:0 1rem .4rem;display:block;font-size:.84rem;color:#8e8e8e;text-decoration:none;}
+.view-comments-link:hover{color:#555;}
+.post-comment-form{border-top:1px solid #efefef;padding:.6rem 1rem;display:flex;align-items:center;gap:.6rem;}
+.comment-input{flex:1;border:none;outline:none;font-size:.88rem;background:transparent;color:#262626;}
+.comment-input::placeholder{color:#8e8e8e;}
+.comment-submit{background:none;border:none;color:#0095f6;font-weight:700;font-size:.88rem;cursor:pointer;}
+.comment-submit:hover{color:#005fbd;}
+.empty-feed{text-align:center;padding:4rem 2rem;background:#fff;border:1px solid #dbdbdb;border-radius:12px;}
+.sidebar-avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid transparent;background:linear-gradient(white,white) padding-box,linear-gradient(45deg,#f09433,#bc1888) border-box;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="feed-layout">
+<main>
+  <!-- ═══ STORY BAR ═══ -->
+  <div class="story-bar">
+    <!-- Apni story add karo -->
+    <a href="{% url 'create_story' %}" class="story-item" style="text-decoration:none;">
+      <div class="story-add-ring">
+        <img src="{{ user.profile.avatar_url }}" class="story-img" alt="{{ user.username }}"/>
+        <span class="story-plus"><i class="bi bi-plus"></i></span>
+      </div>
+      <span class="story-name">Your story</span>
+    </a>
+    <!-- Following ki stories -->
+    {% for story in stories %}
+    <a href="{% url 'view_story' story.pk %}" class="story-item" style="text-decoration:none;">
+      <div class="story-ring">
+        <img src="{{ story.author.profile.avatar_url }}" class="story-img" alt="{{ story.author.username }}"/>
+      </div>
+      <span class="story-name">{{ story.author.username }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+
+  {% if posts %}
+    {% for post in posts %}
+    <article class="post-card" id="post-{{ post.id }}">
+      <div class="post-header">
+        <div class="d-flex align-items-center gap-2">
+          <img src="{{ post.author.profile.avatar_url }}" class="post-avatar" alt="{{ post.author.username }}"/>
+          <div>
+            <a href="{% url 'profile' post.author.username %}" class="post-username d-block">{{ post.author.username }}</a>
+            <span class="post-time">{{ post.created_at|timesince }} ago</span>
+          </div>
+        </div>
+        {% if post.author == user %}
+        <div class="dropdown">
+          <button class="btn btn-link text-muted p-0 px-1" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end" style="border-radius:12px;font-size:.88rem;">
+            <li><a class="dropdown-item" href="{% url 'edit_post' post.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+            <li><a class="dropdown-item text-danger" href="{% url 'delete_post' post.pk %}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if post.image %}<img src="{{ post.image.url }}" class="post-image" alt="post"/>{% endif %}
+
+      <div class="post-actions">
+        <a href="{% url 'toggle_like' post.pk %}" class="action-btn {% if post.id in liked_post_ids %}liked{% endif %}">
+          {% if post.id in liked_post_ids %}<i class="bi bi-heart-fill" style="color:#ed4956;"></i>
+          {% else %}<i class="bi bi-heart"></i>{% endif %}
+        </a>
+        <a href="{% url 'post_detail' post.pk %}" class="action-btn"><i class="bi bi-chat"></i></a>
+        <button class="action-btn share-btn"
+                data-url="{% url 'share_post' post.pk %}"
+                data-title="{{ post.author.username }}'s post"
+                title="Share post">
+          <i class="bi bi-send"></i>
+        </button>
+        <a href="{% url 'toggle_save' post.pk %}" class="action-btn ms-auto" title="Save post">
+          {% if post.id in saved_post_ids %}<i class="bi bi-bookmark-fill" style="color:#262626;"></i>
+          {% else %}<i class="bi bi-bookmark"></i>{% endif %}
+        </a>
+      </div>
+
+      <div class="post-likes">{{ post.like_count }} like{{ post.like_count|pluralize }}</div>
+
+      {% if post.caption %}
+      <div class="post-caption">
+        <a href="{% url 'profile' post.author.username %}" class="caption-author">{{ post.author.username }}</a>{{ post.caption }}
+      </div>
+      {% endif %}
+
+      {% with all_comments=post.comments.all %}
+        {% if all_comments.count > 2 %}
+        <a class="view-comments-link" href="{% url 'post_detail' post.pk %}">View all {{ all_comments.count }} comments</a>
+        {% endif %}
+        {% for c in all_comments|slice:":2" %}
+        <div class="post-comment-preview"><span class="comment-author">{{ c.user.username }}</span>{{ c.text }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="post" action="{% url 'add_comment' post.pk %}" class="post-comment-form">
+        {% csrf_token %}
+        <input type="text" name="text" class="comment-input" placeholder="Add a comment…" maxlength="500" autocomplete="off"/>
+        <button type="submit" class="comment-submit">Post</button>
+      </form>
+    </article>
+    {% endfor %}
+  {% else %}
+    <div class="empty-feed">
+      <i class="bi bi-camera" style="font-size:3.5rem;color:#dbdbdb;"></i>
+      <h5 class="fw-bold mt-3">No posts yet</h5>
+      <p class="text-muted">Be the first to share something!</p>
+      <a href="{% url 'create_post' %}" class="btn btn-primary mt-2 px-4">Share a Photo</a>
+    </div>
+  {% endif %}
+</main>
+
+<aside class="feed-sidebar" style="position:sticky;top:80px;align-self:start;">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <img src="{{ user.profile.avatar_url }}" class="sidebar-avatar" alt="{{ user.username }}"/>
+    <div style="flex:1;">
+      <a href="{% url 'profile' user.username %}" style="font-weight:700;font-size:.92rem;color:#262626;text-decoration:none;display:block;">{{ user.username }}</a>
+      <span style="font-size:.83rem;color:#8e8e8e;">{{ user.get_full_name|default:user.email }}</span>
+    </div>
+    <a href="{% url 'edit_profile' %}" style="font-size:.82rem;color:#0095f6;font-weight:700;text-decoration:none;">Edit</a>
+  </div>
+  <p style="font-size:.78rem;color:#c7c7c7;margin-bottom:.4rem;">© 2026 PixGram</p>
+  <p style="font-size:.78rem;color:#c7c7c7;">
+    <a href="#" style="color:#c7c7c7;text-decoration:none;">About</a> ·
+    <a href="#" style="color:#c7c7c7;text-decoration:none;">Help</a> ·
+    <a href="#" style="color:#c7c7c7;text-decoration:none;">Privacy</a>
+  </p>
+</aside>
+</div>
+{% endblock %}

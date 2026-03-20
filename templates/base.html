@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>{% block title %}PixGram{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#fafafa;color:#262626;min-height:100vh;padding-bottom:70px;}
+    img{max-width:100%;height:auto;}
+
+    /* ── Top Navbar (desktop) ── */
+    .navbar{background:#fff;border-bottom:1px solid #dbdbdb;padding:.55rem 0;position:sticky;top:0;z-index:1000;}
+    .navbar-brand{font-size:1.5rem;font-weight:800;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
+    .nav-link{color:#262626!important;font-weight:500;font-size:.9rem;padding:.4rem .75rem!important;border-radius:8px;transition:background .15s;}
+    .nav-link:hover{background:#f0f0f0;}
+    .nav-link.active{color:#0095f6!important;}
+    .nav-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #dbdbdb;}
+    .btn-nav-post{background:#0095f6;color:#fff!important;border-radius:8px;font-weight:600;font-size:.82rem;padding:.3rem .85rem!important;}
+    .btn-nav-post:hover{background:#1aa3ff;}
+    /* Search */
+    .nav-search-wrap{position:relative;}
+    .nav-search-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:#8e8e8e;font-size:.8rem;pointer-events:none;}
+    .nav-search-input{border:1px solid #dbdbdb;border-radius:20px;padding:.3rem 1rem .3rem 2rem;font-size:.84rem;background:#fafafa;outline:none;width:180px;transition:width .2s,border-color .2s;}
+    .nav-search-input:focus{border-color:#a8a8a8;width:220px;background:#fff;}
+    /* Badge */
+    .badge-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;}
+    .nav-badge{position:absolute;top:-5px;right:-6px;background:#ed4956;color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #fff;}
+
+    /* ── Bottom navbar (mobile only) ── */
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #dbdbdb;z-index:1000;padding:.4rem 0 .5rem;}
+    .bottom-nav-inner{display:flex;align-items:center;justify-content:space-around;}
+    .bn-item{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#262626;font-size:.6rem;font-weight:500;padding:.3rem .5rem;border-radius:8px;position:relative;min-width:48px;}
+    .bn-item i{font-size:1.35rem;margin-bottom:1px;}
+    .bn-item.active{color:#0095f6;}
+    .bn-badge{position:absolute;top:2px;right:6px;background:#ed4956;color:#fff;border-radius:50%;min-width:14px;height:14px;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 2px;border:1.5px solid #fff;}
+    .bn-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;border:2px solid #dbdbdb;margin-bottom:1px;}
+
+    /* ── Alerts ── */
+    .alert{border:none;border-radius:12px;font-size:.88rem;font-weight:500;}
+    .form-control{border-radius:8px;border:1px solid #dbdbdb;font-size:.92rem;}
+    .form-control:focus{border-color:#a8a8a8;box-shadow:none;}
+    .btn-primary{background:#0095f6;border:none;border-radius:8px;font-weight:600;}
+    .btn-primary:hover{background:#1aa3ff;}
+    ::-webkit-scrollbar{width:5px;}
+    ::-webkit-scrollbar-thumb{background:#dbdbdb;border-radius:3px;}
+
+    /* ── Mobile responsive ── */
+    @media(max-width:768px){
+      body{padding-bottom:75px;}
+      .bottom-nav{display:block;}
+      .navbar .d-none.d-md-flex{display:none!important;}
+    }
+    @media(max-width:576px){
+      .container{padding:0 12px;}
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- ── Top Navbar ── -->
+<nav class="navbar navbar-expand-md">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'feed' %}">PixGram</a>
+
+    <!-- Search (desktop only) -->
+    <form class="d-none d-md-flex ms-3" action="{% url 'search' %}" method="get">
+      <div class="nav-search-wrap">
+        <i class="bi bi-search nav-search-icon"></i>
+        <input type="text" name="q" class="nav-search-input"
+               placeholder="Search..." autocomplete="off"
+               value="{{ request.GET.q|default:'' }}"/>
+      </div>
+    </form>
+
+    <button class="navbar-toggler border-0 d-md-none" type="button"
+            data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Desktop nav links -->
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}"
+             href="{% url 'feed' %}"><i class="bi bi-house-door-fill"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'explore' %}active{% endif %}"
+             href="{% url 'explore' %}"><i class="bi bi-compass"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'create_story' %}"><i class="bi bi-plus-circle"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'dm_inbox' %}active{% endif %}"
+             href="{% url 'dm_inbox' %}">
+            <span class="badge-wrap">
+              <i class="bi bi-send"></i>
+              {% if unread_dm_count and unread_dm_count > 0 %}
+              <span class="nav-badge">{% if unread_dm_count > 9 %}9+{% else %}{{ unread_dm_count }}{% endif %}</span>
+              {% endif %}
+            </span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}"
+             href="{% url 'notifications' %}">
+            <span class="badge-wrap">
+              <i class="bi bi-heart"></i>
+              {% if unread_notif_count and unread_notif_count > 0 %}
+              <span class="nav-badge">{% if unread_notif_count > 9 %}9+{% else %}{{ unread_notif_count }}{% endif %}</span>
+              {% endif %}
+            </span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'saved_posts' %}active{% endif %}"
+             href="{% url 'saved_posts' %}">
+            <i class="bi bi-bookmark{% if request.resolver_match.url_name == 'saved_posts' %}-fill{% endif %}"></i>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link btn-nav-post" href="{% url 'create_post' %}">
+            <i class="bi bi-plus-square me-1"></i>New
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2" href="{% url 'profile' user.username %}">
+            <img src="{{ user.profile.avatar_url }}" class="nav-avatar" alt="avatar"/>
+            <span class="d-none d-lg-inline">{{ user.username }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <form method="post" action="{% url 'logout' %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="nav-link btn btn-link text-danger p-0 px-1" style="text-decoration:none;">
+              <i class="bi bi-box-arrow-right"></i>
+            </button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Bottom Navbar (mobile only) ── -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="{% url 'feed' %}" class="bn-item {% if request.resolver_match.url_name == 'feed' %}active{% endif %}">
+      <i class="bi bi-house-door{% if request.resolver_match.url_name == 'feed' %}-fill{% endif %}"></i>
+    </a>
+    <a href="{% url 'explore' %}" class="bn-item {% if request.resolver_match.url_name == 'explore' %}active{% endif %}">
+      <i class="bi bi-compass{% if request.resolver_match.url_name == 'explore' %}-fill{% endif %}"></i>
+    </a>
+    <a href="{% url 'create_post' %}" class="bn-item">
+      <i class="bi bi-plus-square" style="font-size:1.5rem;color:#0095f6;"></i>
+    </a>
+    <a href="{% url 'notifications' %}" class="bn-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+      <span class="badge-wrap">
+        <i class="bi bi-heart{% if request.resolver_match.url_name == 'notifications' %}-fill{% endif %}"></i>
+        {% if unread_notif_count and unread_notif_count > 0 %}
+        <span class="bn-badge">{% if unread_notif_count > 9 %}9+{% else %}{{ unread_notif_count }}{% endif %}</span>
+        {% endif %}
+      </span>
+    </a>
+    <a href="{% url 'profile' user.username %}" class="bn-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+      <img src="{{ user.profile.avatar_url }}" class="bn-avatar" alt="avatar"/>
+    </a>
+  </div>
+</nav>
+{% endif %}
+
+{% if messages %}
+<div class="container mt-3">
+  {% for msg in messages %}
+  <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} alert-dismissible fade show py-2">
+    {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+
+<!-- ── Footer ── -->
+{% if user.is_authenticated %}
+<footer style="text-align:center;padding:1.2rem 1rem 5rem;border-top:1px solid #dbdbdb;margin-top:2rem;background:#fff;">
+  <p style="font-size:.78rem;color:#8e8e8e;margin:0;">
+    © 2026 PixGram &nbsp;·&nbsp; Developed with ❤️ by <strong style="color:#262626;">Amit Gupta</strong>
+  </p>
+</footer>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

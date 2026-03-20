@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} – @{{ profile_user.username }} – PixGram{% endblock %}
+{% block extra_css %}
+<style>
+.fl-wrapper{max-width:500px;margin:2rem auto;padding:0 1rem;}
+.fl-card{background:#fff;border:1px solid #dbdbdb;border-radius:12px;overflow:hidden;}
+.fl-header{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;border-bottom:1px solid #efefef;font-weight:700;font-size:.95rem;}
+.fl-back{color:#262626;text-decoration:none;font-size:1.1rem;}
+.fl-back:hover{color:#0095f6;}
+.fl-item{display:flex;align-items:center;gap:.9rem;padding:.85rem 1.2rem;border-bottom:1px solid #efefef;}
+.fl-item:last-child{border-bottom:none;}
+.fl-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.fl-info{flex:1;min-width:0;}
+.fl-username{font-weight:700;font-size:.9rem;text-decoration:none;color:#262626;display:block;}
+.fl-username:hover{text-decoration:underline;}
+.fl-bio{font-size:.8rem;color:#8e8e8e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-follow-sm{background:#0095f6;border:none;color:#fff;border-radius:8px;padding:.32rem 1rem;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;}
+.btn-follow-sm:hover{background:#1aa3ff;}
+.btn-unfollow-sm{background:#fff;border:1px solid #dbdbdb;color:#262626;border-radius:8px;padding:.32rem 1rem;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;}
+.btn-unfollow-sm:hover{background:#f5f5f5;}
+.empty-fl{text-align:center;padding:3rem 2rem;color:#8e8e8e;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fl-wrapper">
+  <div class="fl-card">
+
+    <!-- Header -->
+    <div class="fl-header">
+      <a href="{% url 'profile' profile_user.username %}" class="fl-back">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <span>{{ profile_user.username }} – {{ title }}</span>
+    </div>
+
+    <!-- List -->
+    {% for person in people %}
+    <div class="fl-item">
+      <img src="{{ person.profile.avatar_url }}" class="fl-avatar" alt="{{ person.username }}"/>
+
+      <div class="fl-info">
+        <a href="{% url 'profile' person.username %}" class="fl-username">{{ person.username }}</a>
+        <span class="fl-bio">{{ person.profile.bio|default:"No bio"|truncatechars:40 }}</span>
+      </div>
+
+      <!-- Apne aap ko follow button mat dikhao -->
+      {% if person != request.user %}
+        <form method="post" action="{% url 'toggle_follow' person.username %}">
+          {% csrf_token %}
+          {% if person.id in my_following %}
+            <button type="submit" class="btn-unfollow-sm">Following</button>
+          {% else %}
+            <button type="submit" class="btn-follow-sm">Follow</button>
+          {% endif %}
+        </form>
+      {% endif %}
+    </div>
+
+    {% empty %}
+    <div class="empty-fl">
+      <i class="bi bi-people" style="font-size:3rem;color:#dbdbdb;display:block;margin-bottom:.8rem;"></i>
+      {% if title == 'Followers' %}
+        <p style="font-weight:700;color:#262626;">Koi follower nahi abhi</p>
+        <p style="font-size:.88rem;">Jab koi follow karega, yahan dikhega.</p>
+      {% else %}
+        <p style="font-weight:700;color:#262626;">Koi following nahi abhi</p>
+        <p style="font-size:.88rem;">Kisi ko follow karo, yahan dikhega.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}

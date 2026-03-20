@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block title %}Post by @{{ post.author.username }} – PixGram{% endblock %}
+
+{% block extra_css %}
+<style>
+.detail-wrapper {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.detail-card {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  min-height: 500px;
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .detail-card { grid-template-columns: 1fr; }
+  .detail-image-pane { min-height: 300px; }
+}
+.detail-image-pane {
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detail-image-pane img {
+  width: 100%; max-height: 600px;
+  object-fit: contain;
+}
+.detail-no-image {
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #fafafa, #efefef);
+  min-height: 300px;
+}
+.detail-no-image p {
+  font-size: 1.1rem; color: #555;
+  padding: 2rem; text-align: center; line-height: 1.6;
+}
+.detail-right {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #dbdbdb;
+}
+.detail-header {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #efefef;
+}
+.detail-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%; object-fit: cover;
+}
+.detail-username {
+  font-weight: 700; font-size: 0.9rem;
+  text-decoration: none; color: #262626;
+}
+.detail-username:hover { text-decoration: underline; }
+
+/* Comments scroll area */
+.comments-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  max-height: 380px;
+}
+.comment-item {
+  display: flex; gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.comment-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%; object-fit: cover; flex-shrink: 0;
+}
+.comment-body { flex: 1; }
+.comment-author {
+  font-weight: 700; font-size: 0.88rem;
+  text-decoration: none; color: #262626;
+  margin-right: 0.3rem;
+}
+.comment-author:hover { text-decoration: underline; }
+.comment-text { font-size: 0.88rem; color: #262626; }
+.comment-time { font-size: 0.72rem; color: #8e8e8e; margin-top: 2px; }
+
+/* Actions */
+.detail-actions {
+  padding: 0.6rem 1rem 0.3rem;
+  border-top: 1px solid #efefef;
+  display: flex; gap: 0.5rem;
+}
+.action-btn {
+  background: none; border: none;
+  font-size: 1.4rem; cursor: pointer;
+  padding: 4px 6px; border-radius: 6px;
+  line-height: 1; transition: transform 0.15s;
+  color: #262626; text-decoration: none;
+  display: inline-flex; align-items: center;
+}
+.action-btn:hover { transform: scale(1.1); }
+.action-btn.liked { color: #ed4956; }
+.action-btn .bi-heart-fill { color: #ed4956; }
+
+.detail-likes {
+  padding: 0 1rem 0.5rem;
+  font-size: 0.88rem; font-weight: 700; color: #262626;
+}
+.detail-caption {
+  padding: 0 1rem 0.8rem;
+  font-size: 0.88rem; color: #262626;
+  border-bottom: 1px solid #efefef;
+}
+.detail-caption .cap-author {
+  font-weight: 700; margin-right: 0.3rem;
+  text-decoration: none; color: #262626;
+}
+
+/* Comment form */
+.detail-comment-form {
+  border-top: 1px solid #efefef;
+  padding: 0.6rem 1rem;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.comment-input {
+  flex: 1; border: none; outline: none;
+  font-size: 0.88rem; background: transparent; color: #262626;
+}
+.comment-input::placeholder { color: #8e8e8e; }
+.comment-submit {
+  background: none; border: none;
+  color: #0095f6; font-weight: 700;
+  font-size: 0.88rem; cursor: pointer;
+}
+.comment-submit:hover { color: #005fbd; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrapper">
+
+  <!-- Back link -->
+  <a href="{% url 'feed' %}" style="color:#262626;text-decoration:none;font-size:0.9rem;font-weight:600;display:inline-flex;align-items:center;gap:0.4rem;margin-bottom:1rem;">
+    <i class="bi bi-arrow-left"></i> Back to feed
+  </a>
+
+  <div class="detail-card">
+
+    <!-- Left: image or caption-only -->
+    <div>
+      {% if post.image %}
+        <div class="detail-image-pane">
+          <img src="{{ post.image.url }}" alt="Post"/>
+        </div>
+      {% else %}
+        <div class="detail-no-image">
+          <p>{{ post.caption }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: comments panel -->
+    <div class="detail-right">
+
+      <!-- Header -->
+      <div class="detail-header">
+        <img src="{{ post.author.profile.avatar_url }}" class="detail-avatar" alt="{{ post.author.username }}"/>
+        <a href="{% url 'profile' post.author.username %}" class="detail-username">{{ post.author.username }}</a>
+        {% if post.author == user %}
+        <div class="ms-auto dropdown">
+          <button class="action-btn" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end" style="border-radius:12px;font-size:0.88rem;">
+            <li><a class="dropdown-item" href="{% url 'edit_post' post.pk %}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+            <li><a class="dropdown-item text-danger" href="{% url 'delete_post' post.pk %}"><i class="bi bi-trash me-2"></i>Delete</a></li>
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Comments scroll -->
+      <div class="comments-area">
+        <!-- Caption as first comment -->
+        {% if post.image and post.caption %}
+        <div class="comment-item">
+          <img src="{{ post.author.profile.avatar_url }}" class="comment-avatar" alt="{{ post.author.username }}"/>
+          <div class="comment-body">
+            <a href="{% url 'profile' post.author.username %}" class="comment-author">{{ post.author.username }}</a>
+            <span class="comment-text">{{ post.caption }}</span>
+            <div class="comment-time">{{ post.created_at|timesince }} ago</div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- All comments -->
+        {% for comment in comments %}
+        <div class="comment-item">
+          <img src="{{ comment.user.profile.avatar_url }}" class="comment-avatar" alt="{{ comment.user.username }}"/>
+          <div class="comment-body">
+            <a href="{% url 'profile' comment.user.username %}" class="comment-author">{{ comment.user.username }}</a>
+            <span class="comment-text">{{ comment.text }}</span>
+            <div class="comment-time">{{ comment.created_at|timesince }} ago</div>
+          </div>
+        </div>
+        {% empty %}
+          <p style="text-align:center;color:#8e8e8e;font-size:0.88rem;margin-top:2rem;">
+            No comments yet. Be the first!
+          </p>
+        {% endfor %}
+      </div>
+
+      <!-- Actions -->
+      <div class="detail-actions">
+        <a href="{% url 'toggle_like' post.pk %}" class="action-btn {% if liked %}liked{% endif %}">
+          {% if liked %}<i class="bi bi-heart-fill"></i>{% else %}<i class="bi bi-heart"></i>{% endif %}
+        </a>
+        <a class="action-btn" href="#comment-input"><i class="bi bi-chat"></i></a>
+      </div>
+
+      <div class="detail-likes">{{ post.like_count }} like{{ post.like_count|pluralize }}</div>
+      <div style="padding:0 1rem 0.5rem;font-size:0.75rem;color:#8e8e8e;">
+        {{ post.created_at|timesince }} ago
+      </div>
+
+      <!-- Comment form -->
+      <form method="post" action="{% url 'add_comment' post.pk %}" class="detail-comment-form">
+        {% csrf_token %}
+        <input type="text" name="text" id="comment-input" class="comment-input"
+               placeholder="Add a comment…" autocomplete="off" maxlength="500"/>
+        <button type="submit" class="comment-submit">Post</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

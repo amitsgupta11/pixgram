@@ -1,0 +1,1 @@
+web: gunicorn pixgram.wsgi --log-file -

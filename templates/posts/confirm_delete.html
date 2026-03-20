@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Delete Post – PixGram{% endblock %}
+
+{% block extra_css %}
+<style>
+.delete-wrapper {
+  max-width: 420px;
+  margin: 4rem auto;
+  padding: 0 1rem;
+}
+.delete-card {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+.delete-icon {
+  font-size: 3rem;
+  color: #ed4956;
+  margin-bottom: 1rem;
+}
+.delete-card h5 { font-weight: 700; margin-bottom: 0.5rem; }
+.delete-card p { color: #8e8e8e; font-size: 0.9rem; margin-bottom: 1.5rem; }
+.btn-confirm-delete {
+  background: #ed4956; border: none; color: #fff;
+  border-radius: 8px; font-weight: 700;
+  padding: 0.6rem 2rem;
+}
+.btn-confirm-delete:hover { background: #d63031; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-wrapper">
+  <div class="delete-card">
+    <div class="delete-icon"><i class="bi bi-trash"></i></div>
+    <h5>Delete this post?</h5>
+    <p>This action cannot be undone. The post and all its likes and comments will be permanently removed.</p>
+
+    {% if post.caption %}
+    <blockquote style="background:#fafafa;border-left:3px solid #dbdbdb;border-radius:8px;padding:0.8rem 1rem;text-align:left;font-size:0.88rem;color:#555;margin-bottom:1.5rem;">
+      {{ post.caption|truncatechars:120 }}
+    </blockquote>
+    {% endif %}
+
+    <div class="d-flex gap-2 justify-content-center">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-confirm-delete">
+          <i class="bi bi-trash me-1"></i>Delete
+        </button>
+      </form>
+      <a href="{% url 'feed' %}" class="btn btn-outline-secondary" style="border-radius:8px;font-weight:600;">
+        Cancel
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

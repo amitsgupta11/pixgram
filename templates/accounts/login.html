@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Log In – PixGram{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  padding: 1rem;
+}
+.auth-card {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 16px;
+  padding: 1.8rem 1.2rem;
+  width: 100%;
+  max-width: 400px;
+}
+.auth-logo {
+  font-size: 2.4rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  margin-bottom: 1.8rem;
+  letter-spacing: -1px;
+}
+.btn-login {
+  width: 100%;
+  background: #0095f6;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.7rem;
+  transition: background 0.2s;
+}
+.btn-login:hover { background: #1aa3ff; color: #fff; }
+.divider {
+  display: flex; align-items: center; gap: 1rem;
+  color: #8e8e8e; font-size: 0.8rem; font-weight: 600;
+  margin: 1.2rem 0;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: #dbdbdb;
+}
+.auth-switch {
+  border: 1px solid #dbdbdb; border-radius: 12px;
+  padding: 1rem; text-align: center;
+  font-size: 0.9rem; margin-top: 1rem; color: #262626;
+}
+.auth-switch a { color: #0095f6; font-weight: 700; text-decoration: none; }
+@media(max-width:480px){
+  .auth-card{padding:2rem 1.2rem;border-radius:12px;}
+  .auth-logo{font-size:2rem;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div>
+    <div class="auth-card">
+      <div class="auth-logo">PixGram</div>
+
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} py-2 mb-3" style="font-size:0.88rem;border-radius:10px;">
+            {{ msg }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <input type="text" name="username" class="form-control form-control-lg"
+                 placeholder="Username" required autofocus
+                 value="{{ request.POST.username|default:'' }}"/>
+        </div>
+
+        <div class="mb-3">
+          <input type="password" name="password" class="form-control form-control-lg"
+                 placeholder="Password" required/>
+        </div>
+
+        <button type="submit" class="btn btn-login">Log in</button>
+      </form>
+
+      <div class="divider">OR</div>
+
+      <p style="text-align:center;">
+        <a href="#" style="font-size:0.88rem;color:#262626;font-weight:600;text-decoration:none;">
+          Forgot password?
+        </a>
+      </p>
+    </div>
+
+    <div class="auth-switch">
+      Don't have an account? <a href="{% url 'signup' %}">Sign up</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

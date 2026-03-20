@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Edit Post – PixGram{% endblock %}
+
+{% block extra_css %}
+<style>
+.edit-post-wrapper {
+  max-width: 540px;
+  margin: 2.5rem auto;
+  padding: 0 1rem;
+}
+.edit-post-card {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.card-header-bar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid #efefef;
+  font-weight: 700; font-size: 0.95rem;
+}
+.card-body-inner { padding: 1.5rem; }
+.btn-save {
+  background: #0095f6; border: none; color: #fff;
+  border-radius: 8px; font-weight: 700; width: 100%;
+  padding: 0.65rem; font-size: 0.95rem;
+}
+.btn-save:hover { background: #1aa3ff; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-post-wrapper">
+  <div class="edit-post-card">
+    <div class="card-header-bar">
+      <span>Edit post</span>
+      <a href="{% url 'feed' %}" style="color:#262626;text-decoration:none;">
+        <i class="bi bi-x-lg"></i>
+      </a>
+    </div>
+    <div class="card-body-inner">
+
+      <!-- Current image preview -->
+      {% if post.image %}
+      <div class="mb-3">
+        <p class="text-muted mb-1" style="font-size:0.82rem;font-weight:600;">Current photo</p>
+        <img src="{{ post.image.url }}" style="width:100%;border-radius:10px;max-height:260px;object-fit:cover;" alt="Current"/>
+      </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label" style="font-size:0.82rem;font-weight:700;color:#8e8e8e;">Caption</label>
+          {{ form.caption }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" style="font-size:0.82rem;font-weight:700;color:#8e8e8e;">
+            Replace photo (optional)
+          </label>
+          {{ form.image }}
+        </div>
+
+        <button type="submit" class="btn btn-save">Save changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
