@@ -114,15 +114,14 @@ Open **http://127.0.0.1:8000** in your browser 🎉
 
 ## 📸 Screenshots
 
-| Feed | Profile | Explore |
-|---|---|---|
-| Instagram-style feed with stories | User profile with post grid | Trending posts & suggested users |
+### 🏠 Home Page
+![Home](screenshots/home.png)
 
-| Direct Messages | Notifications | Stories |
-|---|---|---|
-| Private chat inbox | Like/comment/follow alerts | 24-hour stories |
+### 🔐 Login Page
+![Login](screenshots/login.png)
 
----
+### 👤 Profile Page
+![Profile](screenshots/profile.png)
 
 ## 🔑 Environment Variables
 
